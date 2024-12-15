@@ -9,8 +9,8 @@ const userSchema = new Schema(
       reuired: true,
       unique: true,
       lowercase: true,
-      index: true,
-      trim: index,
+      trim:true,
+      index: true
     },
     email: {
       type: String,
@@ -23,7 +23,7 @@ const userSchema = new Schema(
       type: String,
       reuired: true,
       index: true,
-      trim: index,
+      trim: true,
     },
     avatar: {
       type: String, // cloudinary url
@@ -51,10 +51,10 @@ const userSchema = new Schema(
 );
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  this.password = bcrypt.hash(this.password, 10);
+  this.password = await bcrypt.hash(this.password, 10);
   next();
 });
-username.methods.isPasswordCorrect = async function (password) {
+userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
@@ -73,15 +73,15 @@ userSchema.methods.generateAccessToken = function () {
   );
 };
 userSchema.methods.generateRefreshToken = function () {
-    return jwt.sign(
-        {
-          _id: this._id
-        },
-        process.env.ACCESS_TOKEN_REFRESH,
-        {
-          expiresIn: process.env.ACCESS_TOKEN_REFRESH,
-        }
-      );
+  return jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.ACCESS_TOKEN_REFRESH,
+    {
+      expiresIn: process.env.ACCESS_TOKEN_REFRESH,
+    }
+  );
 };
 
-export const user = mongoose.model("User", userSchema);
+export const User = mongoose.model("User", userSchema);
